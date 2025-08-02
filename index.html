@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover Your Personality Type - MBTI Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .quiz-container {
+            display: none;
+        }
+
+        .quiz-container.active {
+            display: block;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+            transform: translateY(20px);
+            animation: slideIn 0.5s forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .question {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 0.9rem;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .option input[type="radio"] {
+            display: none;
+        }
+
+        .option-text {
+            font-size: 1.1rem;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 25px rgba(108, 117, 125, 0.3);
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .personality-type {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 20px 0;
+        }
+
+        .personality-name {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .personality-description {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .traits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .trait {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .trait h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .trait p {
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-description {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .start-description h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .start-description ul {
+            color: #7f8c8d;
+            line-height: 1.8;
+            margin-left: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .question {
+                font-size: 1.1rem;
+            }
+            
+            .personality-type {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Personality Type Discovery</h1>
+            <p>Discover your unique personality type through this comprehensive MBTI-based assessment</p>
+        </div>
+
+        <div id="startScreen" class="start-screen">
+            <div class="start-description">
+                <h3>About This Assessment</h3>
+                <p>This quiz is based on the Myers-Briggs Type Indicator (MBTI), which categorizes personalities into 16 distinct types. You'll answer questions that explore four key dimensions:</p>
+                <ul>
+                    <li><strong>Energy Direction:</strong> Extraversion (E) vs Introversion (I)</li>
+                    <li><strong>Information Processing:</strong> Sensing (S) vs Intuition (N)</li>
+                    <li><strong>Decision Making:</strong> Thinking (T) vs Feeling (F)</li>
+                    <li><strong>Lifestyle Approach:</strong> Judging (J) vs Perceiving (P)</li>
+                </ul>
+                <br>
+                <p>Take your time with each question and choose the answer that feels most natural to you. There are no right or wrong answers - only insights into your unique personality!</p>
+            </div>
+            <button class="btn" onclick="startQuiz()">Begin Assessment</button>
+        </div>
+
+        <div id="quizContainer" class="quiz-container">
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            
+            <div id="questionCard" class="question-card">
+                <!-- Questions will be inserted here -->
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" disabled>Previous</button>
+                <span id="questionCounter"></span>
+                <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
+            </div>
+        </div>
+
+        <div id="results" class="results">
+            <div class="personality-type" id="personalityType"></div>
+            <div class="personality-name" id="personalityName"></div>
+            <div class="personality-description" id="personalityDescription"></div>
+            <div class="traits" id="personalityTraits"></div>
+            <button class="btn" onclick="restartQuiz()">Take Quiz Again</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "At a party, you're more likely to:",
+                options: [
+                    { text: "Spend time talking to many different people", type: "E" },
+                    { text: "Have deep conversations with a few close friends", type: "I" }
+                ]
+            },
+            {
+                question: "When learning something new, you prefer to:",
+                options: [
+                    { text: "Focus on facts, details, and step-by-step procedures", type: "S" },
+                    { text: "Explore possibilities, patterns, and the big picture", type: "N" }
+                ]
+            },
+            {
+                question: "When making important decisions, you typically:",
+                options: [
+                    { text: "Analyze the logical pros and cons objectively", type: "T" },
+                    { text: "Consider how it will affect people and their feelings", type: "F" }
+                ]
+            },
+            {
+                question: "You prefer to:",
+                options: [
+                    { text: "Plan things in advance and stick to schedules", type: "J" },
+                    { text: "Keep your options open and be spontaneous", type: "P" }
+                ]
+            },
+            {
+                question: "You feel more energized after:",
+                options: [
+                    { text: "Socializing with groups of people", type: "E" },
+                    { text: "Spending quiet time alone or with close friends", type: "I" }
+                ]
+            },
+            {
+                question: "When reading instructions, you tend to:",
+                options: [
+                    { text: "Follow them exactly as written", type: "S" },
+                    { text: "Read them quickly and improvise as needed", type: "N" }
+                ]
+            },
+            {
+                question: "In conflicts, you're more likely to:",
+                options: [
+                    { text: "Focus on finding the most logical solution", type: "T" },
+                    { text: "Try to understand everyone's feelings and find harmony", type: "F" }
+                ]
+            },
+            {
+                question: "Your ideal work environment would be:",
+                options: [
+                    { text: "Structured with clear deadlines and procedures", type: "J" },
+                    { text: "Flexible with room for creativity and adaptation", type: "P" }
+                ]
+            },
+            {
+                question: "When starting a new project, you prefer to:",
+                options: [
+                    { text: "Brainstorm with others and talk through ideas", type: "E" },
+                    { text: "Think it through privately before sharing", type: "I" }
+                ]
+            },
+            {
+                question: "You're more interested in:",
+                options: [
+                    { text: "Practical applications and real-world examples", type: "S" },
+                    { text: "Theories, concepts, and future possibilities", type: "N" }
+                ]
+            },
+            {
+                question: "When giving feedback, you tend to:",
+                options: [
+                    { text: "Be direct and focus on what needs improvement", type: "T" },
+                    { text: "Be gentle and emphasize positive aspects first", type: "F" }
+                ]
+            },
+            {
+                question: "You feel most comfortable when:",
+                options: [
+                    { text: "Things are decided and settled", type: "J" },
+                    { text: "Options remain open for as long as possible", type: "P" }
+                ]
+            },
+            {
+                question: "In social situations, you usually:",
+                options: [
+                    { text: "Introduce yourself to new people easily", type: "E" },
+                    { text: "Wait for others to approach you first", type: "I" }
+                ]
+            },
+            {
+                question: "You're more drawn to:",
+                options: [
+                    { text: "Concrete facts and proven methods", type: "S" },
+                    { text: "Abstract ideas and innovative approaches", type: "N" }
+                ]
+            },
+            {
+                question: "When someone is upset, you're more likely to:",
+                options: [
+                    { text: "Help them analyze the problem logically", type: "T" },
+                    { text: "Offer emotional support and understanding", type: "F" }
+                ]
+            },
+            {
+                question: "You prefer to:",
+                options: [
+                    { text: "Make decisions quickly and move forward", type: "J" },
+                    { text: "Gather more information before deciding", type: "P" }
+                ]
+            }
+        ];
+
+        const personalityTypes = {
+            "INTJ": {
+                name: "The Architect",
+                description: "Strategic thinkers with a plan for everything. INTJs are independent, analytical, and visionary leaders who see the big picture and work systematically toward their goals.",
+                strengths: ["Strategic thinking", "Independent", "Decisive", "Hard-working", "Open-minded", "Jack-of-all-trades"],
+                weaknesses: ["Arrogant", "Judgmental", "Overly analytical", "Loathe highly structured environments", "Clueless in romance"],
+                careers: ["Scientist", "Engineer", "Professor", "Lawyer", "Computer programmer", "Architect"],
+                traits: [
+                    { title: "Strategic Mind", description: "Natural ability to see patterns and plan for the future" },
+                    { title: "Independent", description: "Prefers to work autonomously and trust their own judgment" },
+                    { title: "Perfectionist", description: "High standards for themselves and others" },
+                    { title: "Visionary", description: "Focuses on long-term goals and possibilities" }
+                ]
+            },
+            "INTP": {
+                name: "The Thinker",
+                description: "Innovative inventors with an unquenchable thirst for knowledge. INTPs are logical, creative problem-solvers who love theoretical concepts and abstract thinking.",
+                strengths: ["Great analysts", "Original", "Open-minded", "Curious", "Objective"],
+                weaknesses: ["Very private", "Withdrawn", "Insensitive", "Absent-minded", "Condescending"],
+                careers: ["Researcher", "Philosopher", "Architect", "Professor", "Mathematician", "Systems analyst"],
+                traits: [
+                    { title: "Analytical", description: "Excel at breaking down complex problems" },
+                    { title: "Creative", description: "Generate innovative solutions and ideas" },
+                    { title: "Objective", description: "Make decisions based on logic rather than emotion" },
+                    { title: "Curious", description: "Constant desire to learn and understand" }
+                ]
+            },
+            "ENTJ": {
+                name: "The Commander",
+                description: "Bold, imaginative, and strong-willed leaders. ENTJs are natural-born leaders who find a way or make one, inspiring others to achieve collective goals.",
+                strengths: ["Efficient", "Energetic", "Self-confident", "Strong-willed", "Strategic thinkers", "Charismatic"],
+                weaknesses: ["Stubborn", "Impatient", "Arrogant", "Poor handling of emotions", "Cold and ruthless"],
+                careers: ["Executive", "Entrepreneur", "Lawyer", "Judge", "Business consultant", "University professor"],
+                traits: [
+                    { title: "Natural Leader", description: "Instinctively takes charge in group situations" },
+                    { title: "Strategic", description: "Excellent at long-term planning and goal setting" },
+                    { title: "Efficient", description: "Focuses on results and productivity" },
+                    { title: "Confident", description: "Self-assured in their abilities and decisions" }
+                ]
+            },
+            "ENTP": {
+                name: "The Debater",
+                description: "Smart and curious thinkers who cannot resist an intellectual challenge. ENTPs are innovative, clever, and expressive communicators who love exploring new possibilities.",
+                strengths: ["Knowledgeable", "Quick thinkers", "Original", "Excellent brainstormers", "Charismatic"],
+                weaknesses: ["Very argumentative", "Insensitive", "Intolerant", "Find it difficult to focus", "Dislike practical matters"],
+                careers: ["Lawyer", "Psychologist", "Inventor", "Journalist", "Actor", "Engineer"],
+                traits: [
+                    { title: "Innovative", description: "Constantly generating new ideas and possibilities" },
+                    { title: "Enthusiastic", description: "Brings energy and excitement to projects" },
+                    { title: "Charismatic", description: "Natural ability to inspire and influence others" },
+                    { title: "Quick-witted", description: "Thinks fast and enjoys intellectual challenges" }
+                ]
+            },
+            "INFJ": {
+                name: "The Advocate",
+                description: "Quiet and mystical, yet very inspiring and tireless idealists. INFJs are creative, insightful, and motivated by a deep sense of purpose and meaning.",
+                strengths: ["Creative", "Insightful", "Inspiring", "Convincing", "Decisive", "Determined", "Passionate", "Altruistic"],
+                weaknesses: ["Sensitive", "Extremely private", "Perfectionist", "Always need to have a cause", "Can burn out easily"],
+                careers: ["Counselor", "Psychologist", "Teacher", "Artist", "Writer", "Musician"],
+                traits: [
+                    { title: "Idealistic", description: "Driven by strong values and desire to help others" },
+                    { title: "Insightful", description: "Deep understanding of people and situations" },
+                    { title: "Creative", description: "Original thinking and artistic expression" },
+                    { title: "Determined", description: "Persistent in pursuing meaningful goals" }
+                ]
+            },
+            "INFP": {
+                name: "The Mediator",
+                description: "Poetic, kind, and altruistic people, always eager to help a good cause. INFPs are idealistic, loyal, and driven by their values and beliefs.",
+                strengths: ["Idealistic", "Loyal", "Adaptable", "Curious", "Passionate", "Optimistic"],
+                weaknesses: ["Too idealistic", "Too altruistic", "Impractical", "Dislike dealing with data", "Take things personally"],
+                careers: ["Counselor", "Writer", "Psychologist", "Fine artist", "Physical therapist", "Social worker"],
+                traits: [
+                    { title: "Compassionate", description: "Deep empathy and care for others" },
+                    { title: "Authentic", description: "True to their values and beliefs" },
+                    { title: "Creative", description: "Strong imagination and artistic abilities" },
+                    { title: "Idealistic", description: "Motivated by making the world better" }
+                ]
+            },
+            "ENFJ": {
+                name: "The Protagonist",
+                description: "Charismatic and inspiring leaders, able to mesmerize their listeners. ENFJs are natural teachers who are passionate about helping others reach their potential.",
+                strengths: ["Tolerant", "Reliable", "Charismatic", "Altruistic", "Natural leaders"],
+                weaknesses: ["Overly idealistic", "Too selfless", "Too sensitive", "Fluctuating self-esteem", "Struggle to make tough decisions"],
+                careers: ["Teacher", "Counselor", "Coach", "Politician", "Writer", "Social worker"],
+                traits: [
+                    { title: "Charismatic", description: "Natural ability to inspire and motivate others" },
+                    { title: "Empathetic", description: "Deeply understands others' emotions and needs" },
+                    { title: "Organized", description: "Good at planning and coordinating group efforts" },
+                    { title: "Altruistic", description: "Genuinely cares about helping others succeed" }
+                ]
+            },
+            "ENFP": {
+                name: "The Campaigner",
+                description: "Enthusiastic, creative, and sociable free spirits, who can always find a reason to smile. ENFPs are passionate about life and see endless possibilities in everything.",
+                strengths: ["Curious", "Observant", "Energetic", "Enthusiastic", "Excellent communicators", "Know how to relax"],
+                weaknesses: ["Poor practical skills", "Find it difficult to focus", "Overthink things", "Get stressed easily", "Highly emotional"],
+                careers: ["Journalist", "Actor", "Counselor", "Psychologist", "Entrepreneur", "Teacher"],
+                traits: [
+                    { title: "Enthusiastic", description: "Brings energy and excitement to everything" },
+                    { title: "Creative", description: "Full of innovative ideas and possibilities" },
+                    { title: "People-focused", description: "Genuinely interested in others and relationships" },
+                    { title: "Flexible", description: "Adapts easily to new situations and changes" }
+                ]
+            },
+            "ISTJ": {
+                name: "The Logistician",
+                description: "Practical and fact-minded, reliable and responsible. ISTJs are quiet, serious, and thorough individuals who value tradition and loyalty.",
+                strengths: ["Honest", "Direct", "Strong-willed", "Dutiful", "Very responsible", "Calm"],
+                weaknesses: ["Stubborn", "Insensitive", "Always by the book", "Judgmental", "Often unreasonably blame themselves"],
+                careers: ["Accountant", "Administrator", "Military officer", "Police officer", "Judge", "Lawyer"],
+                traits: [
+                    { title: "Reliable", description: "Can always be counted on to follow through" },
+                    { title: "Organized", description: "Excellent at planning and systematic approaches" },
+                    { title: "Traditional", description: "Values established methods and procedures" },
+                    { title: "Loyal", description: "Deeply committed to people and principles" }
+                ]
+            },
+            "ISFJ": {
+                name: "The Protector",
+                description: "Warm-hearted and dedicated, always ready to protect their loved ones. ISFJs are practical helpers who are loyal, patient, and hard-working.",
+                strengths: ["Supportive", "Reliable", "Patient", "Imaginative", "Observant", "Good practical skills"],
+                weaknesses: ["Humble", "Shy", "Take things to heart", "Repress their feelings", "Overload themselves", "Reluctant to change"],
+                careers: ["Social worker", "Counselor", "Teacher", "Healthcare worker", "Administrator", "Interior designer"],
+                traits: [
+                    { title: "Nurturing", description: "Natural caretakers who put others' needs first" },
+                    { title: "Detail-oriented", description: "Notices and remembers important details" },
+                    { title: "Loyal", description: "Deeply committed to relationships and duties" },
+                    { title: "Practical", description: "Focuses on concrete ways to help others" }
+                ]
+            },
+            "ESTJ": {
+                name: "The Executive",
+                description: "Excellent administrators, unsurpassed at managing things or people. ESTJs are practical, realistic, and matter-of-fact with a natural head for business.",
+                strengths: ["Dedicated", "Strong-willed", "Direct", "Honest", "Loyal", "Patient", "Reliable", "Enjoy creating order"],
+                weaknesses: ["Inflexible", "Stubborn", "Judgmental", "Too focused on social status", "Difficult to relax"],
+                careers: ["Business executive", "Administrator", "Judge", "Teacher", "Banker", "Military officer"],
+                traits: [
+                    { title: "Leadership", description: "Natural ability to organize and direct others" },
+                    { title: "Practical", description: "Focuses on efficient, realistic solutions" },
+                    { title: "Traditional", description: "Values established systems and procedures" },
+                    { title: "Results-oriented", description: "Committed to achieving concrete outcomes" }
+                ]
+            },
+            "ESFJ": {
+                name: "The Consul",
+                description: "Extraordinarily caring, social, and popular people, always eager to help. ESFJs are warm, loyal, and conscientious team players who put others first.",
+                strengths: ["Strong practical skills", "Loyal", "Sensitive", "Warm", "Good at connecting with others"],
+                weaknesses: ["Worried about social status", "Inflexible", "Reluctant to innovate", "Vulnerable to criticism", "Too selfless"],
+                careers: ["Teacher", "Social worker", "Counselor", "Healthcare worker", "Administrator", "Sales representative"],
+                traits: [
+                    { title: "Caring", description: "Genuinely concerned about others' wellbeing" },
+                    { title: "Social", description: "Enjoys building relationships and community" },
+                    { title: "Organized", description: "Creates structure and harmony in groups" },
+                    { title: "Supportive", description: "Always ready to help and encourage others" }
+                ]
+            },
+            "ISTP": {
+                name: "The Virtuoso",
+                description: "Bold and practical experimenters, masters of all kinds of tools. ISTPs are flexible, tolerant, and efficient problem-solvers who learn through hands-on experience.",
+                strengths: ["Optimistic", "Energetic", "Creative", "Practical", "Spontaneous", "Rational", "Know how to prioritize"],
+                weaknesses: ["Stubborn", "Insensitive", "Private", "Reserved", "Easily bored", "Dislike commitment"],
+                careers: ["Mechanic", "Engineer", "Pilot", "Software developer", "Athlete", "Emergency responder"],
+                traits: [
+                    { title: "Practical", description: "Excellent at working with tools and hands-on tasks" },
+                    { title: "Flexible", description: "Adapts quickly to new situations" },
+                    { title: "Independent", description: "Prefers to work autonomously" },
+                    { title: "Logical", description: "Makes decisions based on objective analysis" }
+                ]
+            },
+            "ISFP": {
+                name: "The Adventurer",
+                description: "Flexible and charming artists, always ready to explore new possibilities. ISFPs are gentle, sensitive souls who live in the moment and follow their hearts.",
+                strengths: ["Charming", "Sensitive to others", "Imaginative", "Passionate", "Curious", "Artistic"],
+                weaknesses: ["Fiercely independent", "Unpredictable", "Easily stressed", "Overly competitive", "Fluctuating self-esteem"],
+                careers: ["Artist", "Musician", "Designer", "Psychologist", "Social worker", "Teacher"],
+                traits: [
+                    { title: "Artistic", description: "Strong aesthetic sense and creative expression" },
+                    { title: "Sensitive", description: "Deeply attuned to emotions and atmosphere" },
+                    { title: "Gentle", description: "Kind and considerate in interactions" },
+                    { title: "Spontaneous", description: "Lives in the moment and follows inspiration" }
+                ]
+            },
+            "ESTP": {
+                name: "The Entrepreneur",
+                description: "Smart, energetic, and perceptive people who truly enjoy living on the edge. ESTPs are spontaneous, adaptable, and excellent at dealing with people and situations.",
+                strengths: ["Tolerant", "Energetic", "Optimistic", "Excellent people skills", "Practical", "Spontaneous"],
+                weaknesses: ["Impatient", "Risk-prone", "Unstructured", "May miss the bigger picture", "Defiant"],
+                careers: ["Sales representative", "Entrepreneur", "Entertainer", "Paramedic", "Police officer", "Coach"],
+                traits: [
+                    { title: "Energetic", description: "High energy and enthusiasm for life" },
+                    { title: "Adaptable", description: "Thrives in changing, dynamic environments" },
+                    { title: "People-oriented", description: "Excellent at reading and connecting with others" },
+                    { title: "Action-focused", description: "Prefers doing over planning or theorizing" }
+                ]
+            },
+            "ESFP": {
+                name: "The Entertainer",
+                description: "Spontaneous, energetic, and enthusiastic people - life is never boring around them. ESFPs are warm, friendly, and love to help others in practical ways.",
+                strengths: ["Bold", "Original", "Aesthetics and showmanship", "Practical", "Observant", "Excellent people skills"],
+                weaknesses: ["Sensitive", "Conflict-averse", "Easily bored", "Poor long-term planners", "Unfocused"],
+                careers: ["Actor", "Artist", "Counselor", "Social worker", "Teacher", "Event coordinator"],
+                traits: [
+                    { title: "Enthusiastic", description: "Brings joy and energy to everything they do" },
+                    { title: "Friendly", description: "Naturally warm and approachable" },
+                    { title: "Creative", description: "Strong artistic sense and love of beauty" },
+                    { title: "Spontaneous", description: "Lives in the moment and embraces new experiences" }
+                ]
+            }
+        };
+
+        let currentQuestion = 0;
+        let answers = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+        let selectedAnswer = null;
+
+        function startQuiz() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'block';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            const questionCard = document.getElementById('questionCard');
+            
+            questionCard.innerHTML = `
+                <div class="question">
+                    <span class="question-number">${currentQuestion + 1}</span>
+                    ${question.question}
+                </div>
+                <div class="options">
+                    ${question.options.map((option, index) => `
+                        <div class="option" onclick="selectAnswer('${option.type}', this)">
+                            <input type="radio" name="question${currentQuestion}" value="${option.type}" id="option${index}">
+                            <div class="option-text">${option.text}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            updateProgress();
+            updateNavigation();
+            selectedAnswer = null;
+        }
+
+        function selectAnswer(type, element) {
+            // Remove previous selection
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selection to clicked option
+            element.classList.add('selected');
+            selectedAnswer = type;
+            
+            // Enable next button
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (selectedAnswer) {
+                answers[selectedAnswer]++;
+                
+                currentQuestion++;
+                
+                if (currentQuestion < questions.length) {
+                    showQuestion();
+                } else {
+                    showResults();
+                }
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('questionCounter').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+        }
+
+        function updateNavigation() {
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').disabled = true;
+            
+            if (currentQuestion === questions.length - 1) {
+                document.getElementById('nextBtn').textContent = 'View Results';
+            } else {
+                document.getElementById('nextBtn').textContent = 'Next';
+            }
+        }
+
+        function calculatePersonalityType() {
+            let type = '';
+            type += answers.E > answers.I ? 'E' : 'I';
+            type += answers.S > answers.N ? 'S' : 'N';
+            type += answers.T > answers.F ? 'T' : 'F';
+            type += answers.J > answers.P ? 'J' : 'P';
+            return type;
+        }
+
+        function showResults() {
+            const personalityType = calculatePersonalityType();
+            const typeData = personalityTypes[personalityType];
+            
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            document.getElementById('personalityType').textContent = personalityType;
+            document.getElementById('personalityName').textContent = typeData.name;
+            
+            document.getElementById('personalityDescription').innerHTML = `
+                <h3>Your Personality Profile</h3>
+                <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px;">${typeData.description}</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div>
+                        <h4 style="color: #27ae60; margin-bottom: 10px;">Key Strengths:</h4>
+                        <ul style="color: #7f8c8d; line-height: 1.6;">
+                            ${typeData.strengths.map(strength => `<li>${strength}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #e74c3c; margin-bottom: 10px;">Areas for Growth:</h4>
+                        <ul style="color: #7f8c8d; line-height: 1.6;">
+                            ${typeData.weaknesses.map(weakness => `<li>${weakness}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h4 style="color: #3498db; margin-bottom: 10px;">Ideal Career Paths:</h4>
+                    <p style="color: #7f8c8d; line-height: 1.6;">${typeData.careers.join(', ')}</p>
+                </div>
+            `;
+            
+            document.getElementById('personalityTraits').innerHTML = typeData.traits.map(trait => `
+                <div class="trait">
+                    <h4>${trait.title}</h4>
+                    <p>${trait.description}</p>
+                </div>
+            `).join('');
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            answers = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            selectedAnswer = null;
+            
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
